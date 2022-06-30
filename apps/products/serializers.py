@@ -33,7 +33,7 @@ class ProductsListSerializer(serializers.ModelSerializer):
     images = serializers.FileField(write_only=True)
     class Meta:
         model = Products
-        fields = ("slug", "title", "status", "price", "comments_count", "in_promotion", "thumbnail", "images")
+        fields = ("slug", "title", "status", "price", "comments_count", "in_promotion", "thumbnail", "images", "seen")
 
     
 
@@ -44,12 +44,26 @@ class SubcategoryListSerializer(serializers.ModelSerializer):
 
 
 class SubcategorySerializer(serializers.ModelSerializer):
-    products = ProductsListSerializer(required=False, many=True)
+    # products = ProductsListSerializer(required=False, many=True)
+    products = serializers.SerializerMethodField()
     category_name = serializers.CharField(source="category.title",required=False)
     category_slug = serializers.CharField(source="category.slug", required=False)
     class Meta:
         model = SubCategories
-        fields = ("slug", "title", "category", "products", "category_name", "category_slug")
+        fields = ("slug", "title", "title_en", "title_ru", "title_uz", "category", "products", "category_name", "category_slug")
+        read_only_fields = ('title', "category_name", "category_slug")
+        write_only_fields = ["title_en","title_ru", "title_uz"]
+
+
+        # kwargs = {
+        #     'title_en':{'write_only':True},
+        #     'title_ru':{'write_only':True},
+        #     'title_uz':{'write_only':True},
+        # }
+    
+    def get_products(self, obj):
+        response = ProductsListSerializer(obj.products.all(), many=True).data
+        return response
 
 
 class CategoryListCreateSerializer(serializers.ModelSerializer):
@@ -57,8 +71,10 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
     class Meta:
         model = Categories
-        fields = ("slug", "title", "subcategories")
-
+        fields = ("slug", "title", "title_en","title_ru", "title_uz", "subcategories")
+        read_only_fields = ('title', )
+        write_only_fields = ["title_en","title_ru", "title_uz"]
+        
         # kwargs = {
         #     'slug':{'read_only':True, }
         # }
@@ -83,9 +99,10 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Categories
-        fields = ("slug", "title","subcategories", "products")
-        read_only_fields = ['slug', "subcategories", "products"]
-        
+        fields = ("slug", "title","title_en","title_ru", "title_uz","subcategories", "products")
+        read_only_fields = ['slug', "subcategories", "products", 'title']
+        write_only_fields = ["title_en","title_ru", "title_uz"]
+
     def update(self, instance, attrs):
         instance.modified = self.context['request'].user
         return super().update(instance, attrs)
@@ -113,17 +130,22 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
         fields = (
-            "slug", "title", 
+            "slug", "title", "title_en","title_ru", "title_uz",
             "category", "category_name", "category_slug",
             "sub_category", "subcategory_name", "subcategory_slug",
-            "description", "characteristics", 'status', 'price', 'quantity',
+            "description_en", "description_ru","description_uz", "characteristics_en", "characteristics_ru", "characteristics_uz", 'status', 'price', 'quantity',
             'comments', 'comments_count', 'in_promotion','similar_products',
-            'images', 
+            'images', 'seen'
         )
         read_only_fields = ['slug',  'category_name', 'category_slug', 'subcategory_name', 'subcategory_slug',
-            'comments', 'comments_count',
-            'in_promotion','similar_products',
+            'comments', 'comments_count', 'title', "description", "characteristics",
+            'in_promotion','similar_products','seen'
             ]
+        write_only_fields = [
+            "title_en","title_ru", "title_uz",
+            "description_en", "description_ru","description_uz",
+            "characteristics_en", "characteristics_ru", "characteristics_uz",
+        ]
 
     def create(self, attrs):
         images = self.context['request'].FILES.pop('files')

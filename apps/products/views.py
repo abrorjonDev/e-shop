@@ -207,6 +207,14 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     lookup_field = 'slug'
 
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance:
+            instance.seen = instance.seen+1 
+            instance.save()
+        serializer = self.serializer_class(instance, many=False)
+        return super().get(request, *args, **kwargs)
+
     def put(self, request, slug):
         instance = self.get_object()
         serializer = self.serializer_class(

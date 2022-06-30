@@ -32,15 +32,12 @@ schema_view = drf_get_schema_view( # new
         default_version="v1",
         description="API for E-shop",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="hello@example.com"),
+        contact=openapi.Contact(email="pro.akhmadov@gmail.com"),
         license=openapi.License(name="BSD License"),
     ),
         public=True,
         permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
 )
-
-
-
 
 
 urlpatterns = [
@@ -54,24 +51,12 @@ urlpatterns = [
             description="E-shop API with Django",
             version="1.0.0"
         ), name='openapi-schema'),
-    # path('openapi/', SpectacularAPIView.as_view(), name='openapi-schema'),
     path('redoc/', TemplateView.as_view(
         template_name='docs/redoc.html',
         extra_context={'schema_url':'openapi-schema'}
     ), name='redoc'),
-    # path(
-    #     "docs/",
-    #     SpectacularSwaggerView.as_view(
-    #         template_name="docs/swagger-ui.html", url_name="openapi-schema", 
-    #     ),
-    #     name="swagger-ui",
-    # ),
-    path('docs/', TemplateView.as_view(
-        template_name='docs/swagger-ui.html',
-        extra_context={'schema_url':'openapi-schema'}
-    ), name='swagger-ui'),
 
-    path('swagger/', schema_view.with_ui( # new
+    path('', schema_view.with_ui( # new
     'swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redocs/', schema_view.with_ui( # new
     'redoc', cache_timeout=0), name='schema-redoc'),

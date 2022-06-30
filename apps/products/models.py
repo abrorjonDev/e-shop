@@ -35,7 +35,11 @@ class Categories(BaseModel):
     def products(self):
         return self.products_set.all()
 
-    
+    @property
+    def count_products(self):
+        return self.products.count()
+
+
     def save(self, *args, **kwargs):
         print(self.title, self.slug)
         if self.slug is None or self.slug == '':
@@ -55,7 +59,7 @@ class SubCategories(BaseModel):
     slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
     title = models.CharField(max_length=120, verbose_name=_('title'))
     category = models.ForeignKey(
-        Categories, models.SET_NULL, null=True, verbose_name=_('Sub category')
+        Categories, models.SET_NULL, null=True, verbose_name=_('Category')
     )
 
     @property
@@ -111,7 +115,7 @@ class Products(BaseModel):
     )
 
     quantity = models.PositiveBigIntegerField(verbose_name=_('Quantity'), help_text=_('How many/much is there on base?'))
-
+    seen = models.PositiveBigIntegerField(default=0)
     # @property
     # def price_in_soum(self):
     
@@ -147,6 +151,9 @@ class Products(BaseModel):
     @property
     def thumbnail(self):
         return self.images.first()
+
+    def __str__(self):
+        return '%s'%(self.slug)
 
 
     class Meta:
@@ -186,6 +193,8 @@ class ProductImages(BaseModel):
         verbose_name = _('Product Image')
         verbose_name_plural = _('Product Images')
 
+    def __str__(self):
+        return '%s'%(self.id)
 
 class Promotions(BaseModel):
     id = models.UUIDField(default=uuid.uuid1, unique=True, primary_key=True, editable=False)
