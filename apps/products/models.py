@@ -7,15 +7,15 @@ from django.utils.text import slugify
 from ckeditor.fields import RichTextField
 from djchoices import DjangoChoices, ChoiceItem
 from django.utils import timezone
-
-
+import random
+from django.conf import settings
 
 # INTERNALS
 from .validators import validate_file_extension
 
 
 class Categories(BaseModel):
-    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'))
+    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
     title = models.CharField(max_length=120, verbose_name=_('title'))
 
     class Meta:
@@ -37,14 +37,22 @@ class Categories(BaseModel):
 
     
     def save(self, *args, **kwargs):
-        if self.slug is None:
+        print(self.title, self.slug)
+        if self.slug is None or self.slug == '':
             self.slug = slugify(self.title)
+            while self.check_existance_of_slug():
+                self.slug = slugify(
+                    '%s-%s'%(self.slug, ''.join(random.choices(self.title, k=2)))
+                )
         return super(Categories, self).save(*args, **kwargs)
 
-        
+    def check_existance_of_slug(self):
+        print(self.slug)
+        return self.__class__.objects.filter(slug=self.slug).count()
+
 
 class SubCategories(BaseModel):
-    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'))
+    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
     title = models.CharField(max_length=120, verbose_name=_('title'))
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Sub category')
@@ -60,10 +68,17 @@ class SubCategories(BaseModel):
         verbose_name_plural = _('Sub Categories')
 
     def save(self, *args, **kwargs):
-        if self.slug is None:
+        if self.slug is None or self.slug == '':
             self.slug = slugify(self.title)
+            while self.check_existance_of_slug():
+                self.slug = slugify(
+                    '%s-%s'%(self.slug, ''.join(random.choices(self.title, k=2)))
+                )
         return super(SubCategories, self).save(*args, **kwargs)
 
+    def check_existance_of_slug(self):
+        print(self.slug)
+        return self.__class__.objects.filter(slug=self.slug).count()
 
 class Products(BaseModel):
 
@@ -72,7 +87,7 @@ class Products(BaseModel):
         in_stock = ChoiceItem('in_stock', 'In Stock')
         archived = ChoiceItem('archived', 'Archived')
 
-    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'))
+    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
     title = models.CharField(max_length=120, verbose_name=_('title'))
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
@@ -111,7 +126,9 @@ class Products(BaseModel):
 
     @property
     def in_promotion(self):
-        return self.promotions_set.filter(is_active=True).first()
+        now = timezone.now()
+
+        return self.promotions_set.filter(date_from__gte=now, date_till__lte=now).first()
 
     @property
     def similar_products(self):
@@ -138,14 +155,20 @@ class Products(BaseModel):
         verbose_name_plural = _('Products')
 
     def save(self, *args, **kwargs):
-        if self.slug is None:
+        if self.slug is None or self.slug == '': 
             self.slug = slugify(self.title)
+            while self.check_existance_of_slug():
+                self.slug = slugify(
+                    '%s-%s'%(self.slug, ''.join(random.choices(self.title, k=2)))
+                )
         return super(Products, self).save(*args, **kwargs)
 
-
+    def check_existance_of_slug(self):
+        print(self.slug)
+        return self.__class__.objects.filter(slug=self.slug).count()
 
 class ProductImages(BaseModel):
-    id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid1)
+    id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid1, editable=False)
     image = models.FileField( upload_to="products", validators=[validate_file_extension])
     product = models.ForeignKey(
         Products, models.CASCADE, 
@@ -154,7 +177,9 @@ class ProductImages(BaseModel):
 
     @property
     def imageURL(self):
-        return self.image.url if self.image is not None else None
+        return '%s%s'%(
+                settings.BASE_SITE_DOMAIN, self.image.url
+                )  if self.image is not None else None
 
     class Meta:
         ordering = ('-modified_at', '-created_at', )
@@ -163,7 +188,7 @@ class ProductImages(BaseModel):
 
 
 class Promotions(BaseModel):
-    id = models.UUIDField(default=uuid.uuid1, unique=True, primary_key=True)
+    id = models.UUIDField(default=uuid.uuid1, unique=True, primary_key=True, editable=False)
     title = models.CharField(max_length=120, verbose_name=_('title'))
     
     date_from = models.DateField(verbose_name=_('date from'), null=True,blank=True)

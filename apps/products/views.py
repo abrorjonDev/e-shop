@@ -2,12 +2,12 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
-
+from django_filters import rest_framework as rf_filter
 
 # INTERNALS
 from .models import *
 from .serializers import *
-
+from .filters import *
 
 class CategoryListView(generics.ListCreateAPIView):
     
@@ -24,6 +24,8 @@ class CategoryListView(generics.ListCreateAPIView):
     
     queryset = Categories.objects.all()
     serializer_class = CategoryListCreateSerializer
+    filter_backends = [rf_filter.DjangoFilterBackend, ]
+    filterset_class = CategoryFilterSet
 
     def post(self, request):
         serializer = self.serializer_class(
@@ -88,7 +90,8 @@ class SubCategoryListView(generics.ListCreateAPIView):
         For getting content in any language, you need to add to headers:
             `Accept-Language`: `en` (or `ru`)
     """
-    
+    filter_backends = [rf_filter.DjangoFilterBackend, ]
+    filterset_fields = ['title', 'category__title', 'category__slug']
     queryset = SubCategories.objects.all()
     serializer_class = SubcategorySerializer
 
@@ -141,7 +144,7 @@ class SubCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     # DON'T NEED OVERRIDE
     # def delete(self, request, slug):
     #    pass      
-
+ 
 
 class ProductListCreateView(generics.ListCreateAPIView):
     
@@ -154,13 +157,30 @@ class ProductListCreateView(generics.ListCreateAPIView):
         
         For getting content in any language, you need to add to headers:
             `Accept-Language`: `en` (or `ru`)
-    """
 
+        IN Post:
+            {
+               "title": "",\n
+               "status": null,\n
+               "price": null,\n
+               "images": null\n
+            }
+    """
+    filter_backends = [rf_filter.DjangoFilterBackend, ]
+    filterset_class = ProductFilterSet
     queryset = Products.objects.all()
-    serializer_class = ProductsListSerializer
     
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ProductSerializer
+        else:
+            return self.serializer_class
+    
+    serializer_class = ProductsListSerializer
+
     def post(self, request):
-        serializer = self.serializer_class(
+        print(request.data)
+        serializer = self.get_serializer(
             data=request.data, 
             context={'request': request}
             )
@@ -183,8 +203,8 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         For getting content in any language, you need to add to headers:
             `Accept-Language`: `en` (or `ru`)
     """
-    queryset = SubCategories.objects.all()
-    serializer_class = SubcategorySerializer
+    queryset = Products.objects.all()
+    serializer_class = ProductSerializer
     lookup_field = 'slug'
 
     def put(self, request, slug):

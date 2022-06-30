@@ -48,10 +48,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'ckeditor_uploader',
+    'drf_yasg',
 
     'djchoices',
     'phonenumber_field',
-
+    'drf_spectacular',
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'allauth',
@@ -63,6 +64,8 @@ INSTALLED_APPS = [
     'apps.orders',
     'apps.products',
 ]
+
+BASE_SITE_DOMAIN = os.environ.get('SITE_DOMAIN')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -128,7 +131,8 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication'
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
     ],
     'DATETIME_FORMAT': '%Y-%m-%d %H:%M:%S',
     'DATE_FORMAT': '%Y-%m-%d',
@@ -146,7 +150,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES':[
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ]
+    ],
+    # "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 
@@ -197,6 +202,20 @@ CKEDITOR_CONFIGS = {
 
 CKEDITOR_UPLOAD_PATH = 'ckeditor_uploads/'
 
+
+FILTERS_DEFAULT_LOOKUP_EXPR = 'icontains'
+
+
+# SWAGGER
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        "api_key": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization"
+        }
+    }
+}
 
 
 # Default primary key field type

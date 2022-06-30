@@ -22,6 +22,26 @@ from django.conf.urls.static import static
 
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
+from drf_yasg.views import get_schema_view as drf_get_schema_view# new
+from drf_yasg import openapi # new
+from rest_framework import permissions 
+
+schema_view = drf_get_schema_view( # new
+    openapi.Info(
+        title="E-shop API",
+        default_version="v1",
+        description="API for E-shop",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="hello@example.com"),
+        license=openapi.License(name="BSD License"),
+    ),
+        public=True,
+        permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
+)
+
+
+
+
 
 urlpatterns = [
     path('djadmin/', admin.site.urls),
@@ -29,19 +49,32 @@ urlpatterns = [
     path('auth/v1/', include('dj_rest_auth.urls')),
     path('auth/v1/registration', include('dj_rest_auth.registration.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('openapi', get_schema_view(
+    path('openapi/', get_schema_view(
             title="E-shop",
             description="E-shop API with Django",
             version="1.0.0"
         ), name='openapi-schema'),
+    # path('openapi/', SpectacularAPIView.as_view(), name='openapi-schema'),
     path('redoc/', TemplateView.as_view(
         template_name='docs/redoc.html',
         extra_context={'schema_url':'openapi-schema'}
     ), name='redoc'),
+    # path(
+    #     "docs/",
+    #     SpectacularSwaggerView.as_view(
+    #         template_name="docs/swagger-ui.html", url_name="openapi-schema", 
+    #     ),
+    #     name="swagger-ui",
+    # ),
     path('docs/', TemplateView.as_view(
         template_name='docs/swagger-ui.html',
         extra_context={'schema_url':'openapi-schema'}
     ), name='swagger-ui'),
+
+    path('swagger/', schema_view.with_ui( # new
+    'swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redocs/', schema_view.with_ui( # new
+    'redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
 urlpatterns +=static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
