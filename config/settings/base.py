@@ -29,7 +29,18 @@ SECRET_KEY = 'django-insecure-+5i2rd*m9k=z4#1i(n&(jy!!nj!q_acriysa8)^t5t(s9^+gqm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = ['http://62.209.143.146:8022/','http://shop.abrorjonaxmadov.uz/']
+CORS_REPLACE_HTTPS_REFERER = True
+
+CSRF_COOKIE_DOMAIN = 'http://62.209.143.146:8022/'
+CSRF_USE_SESSIONS=True
 
 
 # Application definition
@@ -42,7 +53,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
@@ -70,6 +80,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -166,7 +177,7 @@ LANGUAGES = [
 ]
 
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 
@@ -183,7 +194,7 @@ STATIC_ROOT = BASE_DIR.joinpath('static')
 
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR.joinpath('media')
+MEDIA_ROOT = BASE_DIR.joinpath('../media')
 
 #CKEDITOR
 CKEDITOR_CONFIGS = {
@@ -223,3 +234,4 @@ SWAGGER_SETTINGS = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TABBED_ADMIN_USE_JQUERY_UI = True
+LOGIN_URL = 'rest_login'

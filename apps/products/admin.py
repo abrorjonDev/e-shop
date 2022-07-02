@@ -56,11 +56,11 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Products)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'title', 'price', 'in_promotion')
+    list_display = ('title', 'price', 'in_promotion')
     # readonly_fields = ('slug', )
     list_filter = ( 'status', 'category', 'sub_category',)
     search_fields = ('category__title', 'sub_category__title', 'title', 'description', 'characteristics')
-
+    #readonly_fields = ('slug', 'created_at', 'modified_at')
     prepopulated_fields = {'slug':('title', )}
     list_per_page = 25
     inlines = [ImageInline]

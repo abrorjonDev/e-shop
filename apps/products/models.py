@@ -91,7 +91,7 @@ class Products(BaseModel):
         in_stock = ChoiceItem('in_stock', 'In Stock')
         archived = ChoiceItem('archived', 'Archived')
 
-    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
+    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'))
     title = models.CharField(max_length=120, verbose_name=_('title'))
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
