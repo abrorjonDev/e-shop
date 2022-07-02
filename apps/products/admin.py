@@ -89,6 +89,9 @@ class PromotionAdmin(admin.ModelAdmin):
             'fields': ('description_en', 'description_ru', 'description_uz'),  
             'classes':('collapse', )
         }),
+        ( _('MAIN PART'), {
+            'fields': ('percentage', 'date_from', 'date_till')
+        }),
         ( _('IMPORTANTS'), {
             'fields': ('created', 'modified', ('created_at', 'modified_at'))
         }),

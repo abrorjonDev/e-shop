@@ -4,6 +4,9 @@ from rest_framework import status
 from rest_framework import generics
 from django_filters import rest_framework as rf_filter
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 # INTERNALS
 from .models import *
 from .serializers import *
@@ -165,6 +168,8 @@ class ProductListCreateView(generics.ListCreateAPIView):
                "price": null,\n
                "images": null\n
             }
+        
+        Add `files` to your request for posting product with it's images. 
     """
     filter_backends = [rf_filter.DjangoFilterBackend, ]
     filterset_class = ProductFilterSet
@@ -178,6 +183,7 @@ class ProductListCreateView(generics.ListCreateAPIView):
     
     serializer_class = ProductsListSerializer
 
+    @swagger_auto_schema(request_body=ProductSerializer,  response={201:ProductsListSerializer})
     def post(self, request):
         print(request.data)
         serializer = self.get_serializer(
@@ -205,6 +211,11 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Products.objects.all()
     serializer_class = ProductSerializer
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return ProductUpdateSerializer
+        else:
+            return self.serializer_class
     lookup_field = 'slug'
 
     def get(self, request, *args, **kwargs):
@@ -212,12 +223,12 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         if instance:
             instance.seen = instance.seen+1 
             instance.save()
-        serializer = self.serializer_class(instance, many=False)
+        serializer = self.get_serializer(instance, many=False)
         return super().get(request, *args, **kwargs)
 
     def put(self, request, slug):
         instance = self.get_object()
-        serializer = self.serializer_class(
+        serializer = self.get_serializer(
             instance, 
             data=request.data, 
             partial=True, 
@@ -225,7 +236,7 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
             )
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data, status=200)
+            return self.get(request, slug=slug) # Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
     
     def patch(self, request, slug):
@@ -234,4 +245,3 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     # DON'T NEED OVERRIDE
     # def delete(self, request, slug):
     #    pass      
-

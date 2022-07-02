@@ -97,7 +97,7 @@ class Products(BaseModel):
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
     )
     sub_category = models.ForeignKey(
-        SubCategories, models.SET_NULL, null=True, verbose_name=_('Sub category')
+        SubCategories, models.SET_NULL, related_name='products', null=True, verbose_name=_('Sub category')
     )
     description = RichTextField(config_name='default')
     characteristics = RichTextField(config_name='default')
@@ -114,7 +114,7 @@ class Products(BaseModel):
         help_text=_('Price needs to be input in USD')
     )
 
-    quantity = models.PositiveBigIntegerField(verbose_name=_('Quantity'), help_text=_('How many/much is there on base?'))
+    quantity = models.PositiveBigIntegerField(verbose_name=_('Quantity'), help_text=_('How many/much is there on base?'), null=True, blank=True)
     seen = models.PositiveBigIntegerField(default=0)
     # @property
     # def price_in_soum(self):
@@ -132,7 +132,7 @@ class Products(BaseModel):
     def in_promotion(self):
         now = timezone.now()
 
-        return self.promotions_set.filter(date_from__gte=now, date_till__lte=now).first()
+        return self.promotions_set.filter(date_from__lte=now, date_till__gte=now).first()
 
     @property
     def similar_products(self):
@@ -140,7 +140,8 @@ class Products(BaseModel):
             Q(category=self.category) |
             Q(sub_category=self.sub_category)
             ).exclude(
-                slug=self.slug
+                Q(slug=self.slug)|
+                Q(status=Products.STATUS.archived)
             )[:20]
 
     @property
@@ -215,7 +216,7 @@ class Promotions(BaseModel):
 
     @property
     def is_active(self):
-        now = timezone.now()
+        now = timezone.now().date()
         return (now >= self.date_from and now <= self.date_till ) if self.date_from and self.date_till else False 
 
 

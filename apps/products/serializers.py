@@ -1,7 +1,8 @@
+from tkinter import E
 from rest_framework import serializers
 
-
-
+from rest_framework.generics import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from .models import *
 
 
@@ -52,14 +53,11 @@ class SubcategorySerializer(serializers.ModelSerializer):
         model = SubCategories
         fields = ("slug", "title", "title_en", "title_ru", "title_uz", "category", "products", "category_name", "category_slug")
         read_only_fields = ('title', "category_name", "category_slug")
-        write_only_fields = ["title_en","title_ru", "title_uz"]
-
-
-        # kwargs = {
-        #     'title_en':{'write_only':True},
-        #     'title_ru':{'write_only':True},
-        #     'title_uz':{'write_only':True},
-        # }
+        extra_kwargs = {
+            'title_en': {'write_only':True},
+            'title_ru': {'write_only':True},
+            'title_uz': {'write_only':True},
+        }
     
     def get_products(self, obj):
         response = ProductsListSerializer(obj.products.all(), many=True).data
@@ -73,11 +71,11 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
         model = Categories
         fields = ("slug", "title", "title_en","title_ru", "title_uz", "subcategories")
         read_only_fields = ('title', )
-        write_only_fields = ["title_en","title_ru", "title_uz"]
-        
-        # kwargs = {
-        #     'slug':{'read_only':True, }
-        # }
+        extra_kwargs = {
+            'title_en': {'write_only':True},
+            'title_ru': {'write_only':True},
+            'title_uz': {'write_only':True},
+        }
 
     def create(self, attrs):
         category = Categories(
@@ -101,7 +99,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Categories
         fields = ("slug", "title","title_en","title_ru", "title_uz","subcategories", "products")
         read_only_fields = ['slug', "subcategories", "products", 'title']
-        write_only_fields = ["title_en","title_ru", "title_uz"]
 
     def update(self, instance, attrs):
         instance.modified = self.context['request'].user
@@ -118,7 +115,7 @@ class ProductSerializer(serializers.ModelSerializer):
     comments_count = serializers.IntegerField(read_only=True)
     in_promotion = PromotionListSerializer(many=False, read_only=True)
     images = ProductImagesListSerializer(required=False, many=True)
-    # files = serializers.FileField(write_only=True)
+    files = serializers.FileField(write_only=True)
     category_name = serializers.CharField(source="category.title",read_only=True)
     category_slug = serializers.CharField(source="category.slug", read_only=True)
 
@@ -135,20 +132,28 @@ class ProductSerializer(serializers.ModelSerializer):
             "sub_category", "subcategory_name", "subcategory_slug",
             "description_en", "description_ru","description_uz", "characteristics_en", "characteristics_ru", "characteristics_uz", 'status', 'price', 'quantity',
             'comments', 'comments_count', 'in_promotion','similar_products',
-            'images', 'seen'
+            'images', 'seen', 'files'
         )
         read_only_fields = ['slug',  'category_name', 'category_slug', 'subcategory_name', 'subcategory_slug',
             'comments', 'comments_count', 'title', "description", "characteristics",
             'in_promotion','similar_products','seen'
             ]
-        write_only_fields = [
-            "title_en","title_ru", "title_uz",
-            "description_en", "description_ru","description_uz",
-            "characteristics_en", "characteristics_ru", "characteristics_uz",
-        ]
+        extra_kwargs = {
+            'title_en': {'write_only':True},
+            'title_ru': {'write_only':True},
+            'title_uz': {'write_only':True},
+            'description_en': {'write_only':True},
+            'description_ru': {'write_only':True},
+            'description_uz': {'write_only':True},
+            'characteristics_ru': {'write_only':True},
+            'characteristics_uz': {'write_only':True},
+            'characteristics_en': {'write_only':True},
+            'files': {'write_only':True},
+        }
 
     def create(self, attrs):
         images = self.context['request'].FILES.pop('files')
+        attrs.pop('files')
         product = super().create(attrs)
         product.created = self.context['request'].user
         product.save()
@@ -159,4 +164,121 @@ class ProductSerializer(serializers.ModelSerializer):
                 created=product.created
             )
         return product
+
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     if data.get('title_en', None):
+    #         del data['title_en']
+    #     return data
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Products
+        exclude = ('title', 'description', 'characteristics', )
+
+    def update(self, instance, attrs):
+        instance.modified = self.context['request'].user
+        print("ATTRS: ",attrs)
+        # if self.context['request'].data
+        files = self.context['request'].FILES.pop('files', None)
+        if files:
+            ProductImages.objects.filter(product=instance).delete()
+            for img in files:
+                ProductImages.objects.create(
+                image=img,
+                product=instance,
+                created=instance.modified
+            )
+        return super().update(instance, attrs)
+
+class ProductImagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImages
+        fields = "__all__"
+        extra_kwargs = {
+            'image':{'read_only':False}
+        }
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductComments
+        fields = "__all__"
+
+
+class PromotionSerializer(serializers.ModelSerializer):
+    # is_active = serializers.BooleanField(read_only=True)
+    created_by = serializers.CharField(source='created.username', required=False)
+    modified_by = serializers.CharField(source='modified.username', required=False)
+    promoted_products = serializers.SerializerMethodField(method_name='get_promoted_products')
+    class Meta:
+        model = Promotions
+        fields = (
+            "id", 
+            "title","title_uz", "title_ru", "title_en", 
+            "percentage", "is_active", 
+            'date_from', 'date_till', 
+            "created_by", "modified_by", 
+            "description", "description_uz", "description_ru", "description_en",
+            "products", "promoted_products"
+            )
+        read_only_fields = ['created_by', 'modified_by', 'promoted_products']
+        extra_kwargs = {
+            "description_uz":{"write_only":True, },
+            "description_ru":{"write_only":True, },
+            "description_en":{"write_only":True, },
+            "title_ru":{"write_only":True, },
+            "title_uz":{"write_only":True, },
+            "title_en":{"write_only":True, },
+            "title":{"read_only":True, },
+            "description":{"read_only":True, },
+            "products":{"write_only":True, }            
+        }
+
+    def create(self, validated_data):
+        promotion = super().create(validated_data)
+        if promotion:
+            promotion.created = self.context['request'].user
+            promotion.save()
+        return promotion
+
+    def update(self, instance, validated_data):
+        promotion = super().update(instance, validated_data)
+        if promotion:
+            promotion.modified = self.context['request'].user
+            promotion.save()
+        return promotion
+
+    def get_promoted_products(self, obj):
+        res = ProductsListSerializer(obj.products.all(), many=True).data
+        return res
+        
+
+class PromotionUpdateSerializer(serializers.Serializer):
+    ACTIONS = (
+        ('add', _('ADD')),
+        ('remove', _('REMOVE')),
+    )
+    product = serializers.CharField()
+    action = serializers.ChoiceField(choices=ACTIONS)
+
+    def create(self, validated_data):
+        return None
+
+    def update(self, instance, attrs):
+        product_obj = get_object_or_404(Products, slug=attrs['product'])
+        action = attrs.pop('action')
+
+        try:
+            if action == 'add':
+                instance.products.add(product_obj)
+            elif action == 'remove':
+                instance.products.remove(product_obj)
+            instance.modified = self.context['request'].user
+            instance.save()
+            return instance
+        except Exception as e:
+            raise e
+        
+    def to_representation(self, instance):
+        return {'detail':'Completed'}
 
