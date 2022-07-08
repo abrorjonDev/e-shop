@@ -1,5 +1,4 @@
 from django.contrib import admin
-from tabbed_admin import TabbedModelAdmin
 from .models import *
 
 from django.utils.translation import gettext_lazy as _
@@ -56,7 +55,7 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Products)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('title', 'price', 'in_promotion')
+    list_display = ('slug', 'title', 'price', 'in_promotion')
     # readonly_fields = ('slug', )
     list_filter = ( 'status', 'category', 'sub_category',)
     search_fields = ('category__title', 'sub_category__title', 'title', 'description', 'characteristics')

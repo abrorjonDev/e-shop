@@ -30,13 +30,12 @@ SECRET_KEY = 'django-insecure-+5i2rd*m9k=z4#1i(n&(jy!!nj!q_acriysa8)^t5t(s9^+gqm
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = ['http://62.209.143.146:8022/','http://shop.abrorjonaxmadov.uz/']
+CSRF_TRUSTED_ORIGINS = os.environ.get('TRUSTED_ORIGINS').split(', ')
 CORS_REPLACE_HTTPS_REFERER = True
 
 CSRF_COOKIE_DOMAIN = 'http://62.209.143.146:8022/'
@@ -83,6 +82,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    "corsheaders.middleware.CorsPostCsrfMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

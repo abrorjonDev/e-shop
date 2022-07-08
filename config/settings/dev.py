@@ -7,7 +7,7 @@ DATABASES = {
         'NAME': 'e_shop',
         'HOST': 'localhost',
         'PORT': '',
-        'USER': 'admin',
+        'USER': 'abror',
         'PASSWORD': 'testing321'
     }
 }
