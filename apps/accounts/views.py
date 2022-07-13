@@ -6,9 +6,11 @@ from django.shortcuts import render
     # PASSWORD RESET
     # PASSWORD CHANGE
     # REGISTER
+
+from .serializers import CompanyInfoSerializer
 from .models import CompanyInfo
 from rest_framework.viewsets import ModelViewSet
 class CompanyDataAPIView(ModelViewSet):
-    queryset = CompanyInfo
+    queryset = CompanyInfo.objects.all()
     serializer_class = CompanyInfoSerializer
     

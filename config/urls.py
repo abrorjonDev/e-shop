@@ -43,6 +43,7 @@ schema_view = drf_get_schema_view( # new
 urlpatterns = [
     path('djadmin/', admin.site.urls),
     path('api/v1/', include('apps.products.urls')),
+    path('api/v1/', include('apps.accounts.urls')),
     path('auth/v1/', include('dj_rest_auth.urls')),
     path('auth/v1/registration', include('dj_rest_auth.registration.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
