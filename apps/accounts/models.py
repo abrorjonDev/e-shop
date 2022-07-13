@@ -12,8 +12,8 @@ class CompanyInfo(BaseModel):
     team = models.TextField(max_length=5000, null=True)
     team_story = models.TextField(max_length=5000,null=True)
 
-    longitude = models.DecimalField(max_digits=50, decimal_places=25, null=True, blank=True)
-    latitude = models.DecimalField(max_digits=50, decimal_places=25, null=True, blank=True)
+    longitude = models.CharField(max_length=50, null=True, blank=True)
+    latitude = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = _('Company')
