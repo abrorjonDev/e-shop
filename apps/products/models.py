@@ -17,6 +17,12 @@ from .validators import validate_file_extension
 class Categories(BaseModel):
     slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
     title = models.CharField(max_length=120, verbose_name=_('title'))
+    image = models.ImageField(upload_to='categories', null=True, blank=True)
+    @property
+    def imageURL(self):
+        return '%s%s'%(
+                settings.BASE_SITE_DOMAIN, self.image.url
+                )  if self.image is not None else None
     # category = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -62,6 +68,12 @@ class SubCategories(BaseModel):
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
     )
+    image = models.ImageField(upload_to='subcategories', null=True, blank=True)
+    @property
+    def imageURL(self):
+        return '%s%s'%(
+                settings.BASE_SITE_DOMAIN, self.image.url
+                )  if self.image is not None else None
 
     @property
     def products(self):

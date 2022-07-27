@@ -40,7 +40,7 @@ class ProductsListSerializer(serializers.ModelSerializer):
 class SubcategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategories
-        fields = ("slug", "title")
+        fields = ("slug", "title", 'imageURL')
 
 
 class SubcategorySerializer(serializers.ModelSerializer):
@@ -50,13 +50,14 @@ class SubcategorySerializer(serializers.ModelSerializer):
     category_slug = serializers.CharField(source="category.slug", read_only=True)
     class Meta:
         model = SubCategories
-        fields = ("slug", "title", "title_en", "title_ru", "title_uz", "category", "products", "category_name", "category_slug")
-        read_only_fields = ('title', )
+        fields = ("slug", "title", "title_en", "title_ru", "title_uz", "category", "products", "category_name", "category_slug", "image", "imageURL")
+        read_only_fields = ('title', "imageURL")
         extra_kwargs = {
             'title_en': {'write_only':True},
             'title_ru': {'write_only':True},
             'title_uz': {'write_only':True},
             'category': {'write_only':True},
+            'image': {'write_only':True},
         }
     
     def get_products(self, obj):
@@ -69,12 +70,13 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(read_only=True)
     class Meta:
         model = Categories
-        fields = ("slug", "title", "title_en","title_ru", "title_uz", "subcategories")
-        read_only_fields = ('title', 'subcategories')
+        fields = ("slug", "title", "title_en","title_ru", "title_uz", "subcategories", "image", "imageURL")
+        read_only_fields = ('title', 'subcategories', "imageURL")
         extra_kwargs = {
             'title_en': {'write_only':True},
             'title_ru': {'write_only':True},
             'title_uz': {'write_only':True},
+            'image': {'write_only':True},
         }
 
     def create(self, attrs):
@@ -97,8 +99,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Categories
-        fields = ("slug", "title","title_en","title_ru", "title_uz","subcategories", "products")
-        read_only_fields = ['slug', "subcategories", "products", 'title']
+        fields = ("slug", "title","title_en","title_ru", "title_uz","subcategories", "products", "image", "imageURL")
+        read_only_fields = ['slug', "subcategories", "products", 'title', "imageURL"]
+
+        extra_kwargs = {
+            'image': {'write_only':True},
+        }
 
     def update(self, instance, attrs):
         instance.modified = self.context['request'].user
