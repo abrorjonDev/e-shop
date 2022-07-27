@@ -17,6 +17,7 @@ from .validators import validate_file_extension
 class Categories(BaseModel):
     slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
     title = models.CharField(max_length=120, verbose_name=_('title'))
+    # category = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
 
     class Meta:
         ordering = ("-modified_at", "-created_at")
@@ -214,6 +215,15 @@ class Promotions(BaseModel):
         verbose_name=_('Percentage')
     )
 
+    image = models.ImageField(_('Promotion image'), upload_to='promotions', null=True, blank=True)
+    
+    @property
+    def imageURL(self):
+        return '%s%s'%(
+                settings.BASE_SITE_DOMAIN, self.image.url
+                )  if self.image is not None else None
+
+    
     @property
     def is_active(self):
         now = timezone.now().date()
@@ -242,3 +252,30 @@ class ProductComments(BaseModel):
         ordering = ("-id", )
         verbose_name = _('Comment')
         verbose_name_plural = _('Comments')
+
+
+class Contacts(models.Model):
+    SEEN = 'seen'
+    NOT_SEEN = 'not-seen'
+    CHOICES = (
+        (SEEN, 'ADMIN k\'rdi'),
+        (NOT_SEEN, 'ADMIN ko\'rmadi'),
+    )
+    name = models.CharField(_('User name'), max_length=200)
+    text = models.CharField(max_length=5000)
+    date_created = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=CHOICES)
+    file = models.FileField(null=True, blank=True, upload_to='contacts')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Contacts')
+        verbose_name_plural = _('Contacts')
+
+    @property
+    def fileURL(self):
+        return '%s%s'%(
+                settings.BASE_SITE_DOMAIN, self.image.url
+                )  if self.image is not None else None

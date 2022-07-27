@@ -194,7 +194,7 @@ STATIC_ROOT = BASE_DIR.joinpath('static')
 
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR.joinpath('../media')
+MEDIA_ROOT = BASE_DIR.joinpath('media')
 
 #CKEDITOR
 CKEDITOR_CONFIGS = {
@@ -224,9 +224,10 @@ SWAGGER_SETTINGS = {
             "in": "header",
             "name": "Authorization"
         }
-    }
+    },
+    'SECURE_PROXY_SSL_HEADER': ('HTTP_X_FORWARDED_PROTO', 'https')
 }
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

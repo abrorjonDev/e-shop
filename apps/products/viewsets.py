@@ -29,11 +29,11 @@ class PromotionViewSet(viewsets.ModelViewSet):
     queryset = Promotions.objects.all()
     serializer_class = PromotionSerializer
 
-    # def get_serializer_context(self):
-    #     context = super().get_serializer_context()
-    #     context['salom'] = 'text'
-    #     print("CONTEXT: ", context)
-    #     return context
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        # context['request'] = self.request
+        print("CONTEXT: ", context)
+        return context
 
 
 class PromotionProductAddRemoveViewSet(viewsets.ModelViewSet):

@@ -46,16 +46,17 @@ class SubcategoryListSerializer(serializers.ModelSerializer):
 class SubcategorySerializer(serializers.ModelSerializer):
     # products = ProductsListSerializer(required=False, many=True)
     products = serializers.SerializerMethodField()
-    category_name = serializers.CharField(source="category.title",required=False)
-    category_slug = serializers.CharField(source="category.slug", required=False)
+    category_name = serializers.CharField(source="category.title", read_only=True)
+    category_slug = serializers.CharField(source="category.slug", read_only=True)
     class Meta:
         model = SubCategories
         fields = ("slug", "title", "title_en", "title_ru", "title_uz", "category", "products", "category_name", "category_slug")
-        read_only_fields = ('title', "category_name", "category_slug")
+        read_only_fields = ('title', )
         extra_kwargs = {
             'title_en': {'write_only':True},
             'title_ru': {'write_only':True},
             'title_uz': {'write_only':True},
+            'category': {'write_only':True},
         }
     
     def get_products(self, obj):
@@ -64,12 +65,12 @@ class SubcategorySerializer(serializers.ModelSerializer):
 
 
 class CategoryListCreateSerializer(serializers.ModelSerializer):
-    subcategories = SubcategoryListSerializer(required=False, many=True)
+    subcategories = SubcategoryListSerializer(read_only=True, many=True)
     slug = serializers.SlugField(read_only=True)
     class Meta:
         model = Categories
         fields = ("slug", "title", "title_en","title_ru", "title_uz", "subcategories")
-        read_only_fields = ('title', )
+        read_only_fields = ('title', 'subcategories')
         extra_kwargs = {
             'title_en': {'write_only':True},
             'title_ru': {'write_only':True},
@@ -91,8 +92,8 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    subcategories = SubcategoryListSerializer(required=False, many=True)
-    products = ProductsListSerializer(required=False, many=True)
+    subcategories = SubcategoryListSerializer(read_only=True, many=True)
+    products = ProductsListSerializer(read_only=True, many=True)
 
     class Meta:
         model = Categories
@@ -110,7 +111,7 @@ class CommentsListSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "review", "comment", )
 
 class ProductSerializer(serializers.ModelSerializer):
-    comments = CommentsListSerializer(required=False, many=True, read_only=True)
+    comments = CommentsListSerializer(many=True, read_only=True)
     comments_count = serializers.IntegerField(read_only=True)
     in_promotion = PromotionListSerializer(many=False, read_only=True)
     images = ProductImagesListSerializer(required=False, many=True)
@@ -133,9 +134,8 @@ class ProductSerializer(serializers.ModelSerializer):
             'comments', 'comments_count', 'in_promotion','similar_products',
             'images', 'seen', 'files'
         )
-        read_only_fields = ['slug',  'category_name', 'category_slug', 'subcategory_name', 'subcategory_slug',
-            'comments', 'comments_count', 'title', "description", "characteristics",
-            'in_promotion','similar_products','seen'
+        read_only_fields = [
+             'title', "description", "characteristics",'seen'
             ]
         extra_kwargs = {
             'title_en': {'write_only':True},
@@ -174,6 +174,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
         exclude = ('title', 'description', 'characteristics', )
+        read_only_fields = ['created_by', 'modified_by']
+
 
     def update(self, instance, attrs):
         instance.modified = self.context['request'].user
@@ -203,12 +205,17 @@ class CommentSerializer(serializers.ModelSerializer):
         model = ProductComments
         fields = "__all__"
 
+class PromoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Promotions
+        fields = "__all__"
 
 class PromotionSerializer(serializers.ModelSerializer):
     # is_active = serializers.BooleanField(read_only=True)
-    created_by = serializers.CharField(source='created.username', required=False)
-    modified_by = serializers.CharField(source='modified.username', required=False)
+    created_by = serializers.CharField(source='created.username', read_only=True)
+    modified_by = serializers.CharField(source='modified.username', read_only=True)
     promoted_products = serializers.SerializerMethodField(method_name='get_promoted_products')
+    # image = serializers.ImageField(required=False)
     class Meta:
         model = Promotions
         fields = (
@@ -218,9 +225,9 @@ class PromotionSerializer(serializers.ModelSerializer):
             'date_from', 'date_till', 
             "created_by", "modified_by", 
             "description", "description_uz", "description_ru", "description_en",
-            "products", "promoted_products"
+            "products", "promoted_products", 'image', 'imageURL'
             )
-        read_only_fields = ['created_by', 'modified_by', 'promoted_products']
+        read_only_fields = ['title', 'description', 'imageURL']
         extra_kwargs = {
             "description_uz":{"write_only":True, },
             "description_ru":{"write_only":True, },
@@ -228,9 +235,8 @@ class PromotionSerializer(serializers.ModelSerializer):
             "title_ru":{"write_only":True, },
             "title_uz":{"write_only":True, },
             "title_en":{"write_only":True, },
-            "title":{"read_only":True, },
-            "description":{"read_only":True, },
-            "products":{"write_only":True, }            
+            "products":{"write_only":True, },
+            "image":{ "read_only":False, },
         }
 
     def create(self, validated_data):
@@ -281,3 +287,18 @@ class PromotionUpdateSerializer(serializers.Serializer):
     def to_representation(self, instance):
         return {'detail':'Completed'}
 
+
+
+class ContactsSerializer(serializers.ModelSerializer):
+    fileURL = serializers.CharField(read_only=True)
+    class Meta:
+        model = Contacts
+        exclude = ('status', )
+    def create(self, attrs):
+        attrs['status'] = Contacts.SEEN
+        return super().create(attrs)
+
+class ContactsUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contacts
+        fields = ('status', )

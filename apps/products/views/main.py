@@ -8,11 +8,15 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 # INTERNALS
-from .models import *
-from .serializers import *
-from .filters import *
+from ..models import *
+from ..serializers import *
+from ..filters import *
 
-class CategoryListView(generics.ListCreateAPIView):
+class CategoryBaseClass:
+    queryset = Categories.objects.all()
+    serializer_class = CategoryListCreateSerializer
+
+class CategoryListView(CategoryBaseClass, generics.ListAPIView):
     
     """
         Methods you can call here: `GET`, `POST`\n
@@ -25,11 +29,12 @@ class CategoryListView(generics.ListCreateAPIView):
             `Accept-Language`: `en` (or `ru`)
     """
     
-    queryset = Categories.objects.all()
-    serializer_class = CategoryListCreateSerializer
     filter_backends = [rf_filter.DjangoFilterBackend, ]
     filterset_class = CategoryFilterSet
 
+
+class CategoryCreateAPIView(CategoryBaseClass, generics.CreateAPIView):
+    """Create API View"""
     def post(self, request):
         serializer = self.serializer_class(
             data=request.data, 
@@ -43,111 +48,68 @@ class CategoryListView(generics.ListCreateAPIView):
         )
 
 
-class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
-    
+class CategoryDetailView(CategoryBaseClass, generics.RetrieveAPIView):
     """
-        Methods you can call here: `GET`, `PUT`, `PATCH`, `DELETE` \n
-        `GET` method is open to any user (for client and admins), however\n
-        Other methods requires authentication.
-        For this, you need to add headers this:
+        For Authentication, you need to add headers this:
             `Authorization`: `Token <user token key from succesfull login response>` 
         
         For getting content in any language, you need to add to headers:
             `Accept-Language`: `en` (or `ru`)
     """
 
-    queryset = Categories.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'slug'
 
-    def put(self, request, slug):
-        instance = self.get_object()
-        serializer = self.serializer_class(
-            instance, 
-            data=request.data, 
-            partial=True, 
-            context={"request": request}
-            )
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
-    
-    def patch(self, request, slug):
-        return self.put(request, slug)
 
-    # DON'T NEED OVERRIDE
-    # def delete(self, request, slug):
-    #    pass      
+class CategoryUpdateAPIView(CategoryBaseClass, generics.UpdateAPIView):
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
 
 
-class SubCategoryListView(generics.ListCreateAPIView):
+class CategoryDeleteAPIView(CategoryBaseClass, generics.DestroyAPIView):
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+
+###########################################################################################
+
+class SubCategoryBaseClass:
+    queryset = SubCategories.objects.all()
+    serializer_class = SubcategorySerializer
+
+
+class SubCategoryListView(SubCategoryBaseClass, generics.ListAPIView):
     
     """
-        Methods you can call here: `GET`, `POST`\n
-        `GET` method is open to any user (for client and admins), however\n
-        `POST` method requires authentication.
-        For this, you need to add headers this:
-            `Authorization`: `Token <user token key from succesfull login response>` 
-        
-        For getting content in any language, you need to add to headers:
-            `Accept-Language`: `en` (or `ru`)
+    Sub Categories List APIView.
     """
     filter_backends = [rf_filter.DjangoFilterBackend, ]
     filterset_fields = ['title', 'category__title', 'category__slug']
-    queryset = SubCategories.objects.all()
-    serializer_class = SubcategorySerializer
+    
 
-    def post(self, request):
-        serializer = self.serializer_class(
-            data=request.data, 
-            context={'request': request}
-            )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
+class SubCategoryCreateAPIView(SubCategoryBaseClass, generics.CreateAPIView):
+    """ Sub Category Create API View. """
+    pass
 
 
-class SubCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+class SubCategoryDetailView(SubCategoryBaseClass, generics.RetrieveAPIView):
     
     """
-        Methods you can call here: `GET`, `PUT`, `PATCH`, `DELETE` \n
-        `GET` method is open to any user (for client and admins), however\n
-        Other methods requires authentication.
-        For this, you need to add headers this:
+        For Authorization, you need to add headers this:
             `Authorization`: `Token <user token key from succesfull login response>` 
         
         For getting content in any language, you need to add to headers:
             `Accept-Language`: `en` (or `ru`)
     """
-
-    queryset = SubCategories.objects.all()
-    serializer_class = SubcategorySerializer
     lookup_field = 'slug'
 
-    def put(self, request, slug):
-        instance = self.get_object()
-        serializer = self.serializer_class(
-            instance, 
-            data=request.data, 
-            partial=True, 
-            context={"request": request}
-            )
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
-    
-    def patch(self, request, slug):
-        return self.put(request, slug)
 
-    # DON'T NEED OVERRIDE
-    # def delete(self, request, slug):
-    #    pass      
+class SubcategoryUpdateAPIView(SubCategoryBaseClass, generics.UpdateAPIView):
+    lookup_field = 'slug'
  
+
+class SubcategoryDeleteAPIView(SubCategoryBaseClass, generics.DestroyAPIView):
+    lookup_field = 'slug'
+
 
 class ProductListCreateView(generics.ListCreateAPIView):
     
@@ -245,3 +207,37 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     # DON'T NEED OVERRIDE
     # def delete(self, request, slug):
     #    pass      
+
+
+class PromotionBaseView:
+    queryset = Promotions.objects.all()
+    serializer_class = PromotionSerializer
+
+
+class PromotionListAPIView(PromotionBaseView, generics.ListAPIView):
+    """Promotion List API."""
+
+
+class PromotionCreateAPIView(PromotionBaseView, generics.CreateAPIView):
+    """Promotion Create API."""
+
+
+class PromotionRetrieveAPIView(PromotionBaseView, generics.RetrieveAPIView):
+    """Promotion Retrieve API."""
+
+    lookup_field = 'id'
+
+
+class PromotionUpdateAPIView(PromotionBaseView, generics.UpdateAPIView):
+    """Promotion Update API."""
+    lookup_field = 'id'
+
+
+class PromotionDeleteAPIView(PromotionBaseView, generics.DestroyAPIView):
+    """Promotion Delete API."""
+    lookup_field = 'id'
+
+
+class PromotionAddRemoveAPIView(PromotionBaseView, generics.UpdateAPIView):
+    """You can add or remove products from promotion.."""
+    serializer_class = PromotionUpdateSerializer

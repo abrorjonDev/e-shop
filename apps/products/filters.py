@@ -38,3 +38,12 @@ class ProductFilterSet(filter.FilterSet):
         if value is True:
             return queryset.order_by('-modified_at', '-created_at', )
         return queryset
+
+
+class ContactsFilter(filter.FilterSet):
+    class Meta:
+        model = models.Contacts
+        fields = {
+            'name': ['icontains', ],
+            'status': ['exact']
+        }

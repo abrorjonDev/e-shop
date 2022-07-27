@@ -24,11 +24,19 @@ from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 from drf_yasg.views import get_schema_view as drf_get_schema_view# new
 from drf_yasg import openapi # new
+from drf_yasg.generators import OpenAPISchemaGenerator
 from rest_framework import permissions 
+
+class BothHttpAndHttpsSchemaGenerator(OpenAPISchemaGenerator):
+    def get_schema(self, request=None, public=False):
+        schema = super().get_schema(request, public)
+        schema.schemes = ["http", "https"]
+        return schema
 
 schema_view = drf_get_schema_view( # new
     openapi.Info(
         title="E-shop API",
+        # url='https://shop.abrorjonaxmadov.uz/',
         default_version="v1",
         description="API for E-shop",
         terms_of_service="https://www.google.com/policies/terms/",
@@ -36,6 +44,7 @@ schema_view = drf_get_schema_view( # new
         license=openapi.License(name="BSD License"),
     ),
         public=True,
+        generator_class=BothHttpAndHttpsSchemaGenerator, # Here
         permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
 )
 
