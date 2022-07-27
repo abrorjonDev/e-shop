@@ -22,7 +22,7 @@ class Categories(BaseModel):
     def imageURL(self):
         return '%s%s'%(
                 settings.BASE_SITE_DOMAIN, self.image.url
-                )  if self.image is not None else None
+                )  if (self.image and hasattr(self.image, 'url')) else None
     # category = models.ForeignKey('self', on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -73,7 +73,7 @@ class SubCategories(BaseModel):
     def imageURL(self):
         return '%s%s'%(
                 settings.BASE_SITE_DOMAIN, self.image.url
-                )  if self.image is not None else None
+                )  if (self.image and hasattr(self.image, 'url')) else None
 
     @property
     def products(self):
@@ -200,7 +200,7 @@ class ProductImages(BaseModel):
     def imageURL(self):
         return '%s%s'%(
                 settings.BASE_SITE_DOMAIN, self.image.url
-                )  if self.image is not None else None
+                )  if (self.image and hasattr(self.image, 'url')) else None
 
     class Meta:
         ordering = ('-modified_at', '-created_at', )
@@ -233,7 +233,7 @@ class Promotions(BaseModel):
     def imageURL(self):
         return '%s%s'%(
                 settings.BASE_SITE_DOMAIN, self.image.url
-                )  if self.image is not None else None
+                )  if (self.image and hasattr(self.image, 'url')) else None
 
     
     @property
@@ -289,5 +289,5 @@ class Contacts(models.Model):
     @property
     def fileURL(self):
         return '%s%s'%(
-                settings.BASE_SITE_DOMAIN, self.image.url
-                )  if self.image is not None else None
+                settings.BASE_SITE_DOMAIN, self.file.url
+                )  if (self.file and hasattr(self.file, 'url')) else None

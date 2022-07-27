@@ -68,6 +68,7 @@ class SubcategorySerializer(serializers.ModelSerializer):
 class CategoryListCreateSerializer(serializers.ModelSerializer):
     subcategories = SubcategoryListSerializer(read_only=True, many=True)
     slug = serializers.SlugField(read_only=True)
+    imageURL = serializers.CharField(read_only=True)
     class Meta:
         model = Categories
         fields = ("slug", "title", "title_en","title_ru", "title_uz", "subcategories", "image", "imageURL")
@@ -96,7 +97,7 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = SubcategoryListSerializer(read_only=True, many=True)
     products = ProductsListSerializer(read_only=True, many=True)
-
+    imageURL = serializers.CharField(read_only=True)
     class Meta:
         model = Categories
         fields = ("slug", "title","title_en","title_ru", "title_uz","subcategories", "products", "image", "imageURL")
