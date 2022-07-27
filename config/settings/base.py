@@ -193,8 +193,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR.joinpath('static')
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR.joinpath('media')
+MEDIA_URL = '/config/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # BASE_DIR.joinpath('config/media')
 
 #CKEDITOR
 CKEDITOR_CONFIGS = {
