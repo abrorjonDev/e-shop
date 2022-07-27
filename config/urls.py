@@ -30,13 +30,13 @@ from rest_framework import permissions
 class BothHttpAndHttpsSchemaGenerator(OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
-        schema.schemes = ["http", "https"]
+        schema.schemes = ["https"]
         return schema
 
 schema_view = drf_get_schema_view( # new
     openapi.Info(
         title="E-shop API",
-        # url='https://shop.abrorjonaxmadov.uz/',
+        url='https://shop.abrorjonaxmadov.uz/',
         default_version="v1",
         description="API for E-shop",
         terms_of_service="https://www.google.com/policies/terms/",
