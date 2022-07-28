@@ -1,6 +1,6 @@
 
 from rest_framework import viewsets
-
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 # INTERNALS
 from .models import *
 from .serializers import *
@@ -9,7 +9,7 @@ from .filters import *
 class ProductImagesViewSet(viewsets.ModelViewSet):
     queryset = ProductImages.objects.all()
     serializer_class = ProductImagesSerializer
-
+    parser_classes = (FormParser, MultiPartParser)
     def update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return super().update(request, *args, **kwargs)

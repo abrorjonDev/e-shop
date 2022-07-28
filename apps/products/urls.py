@@ -10,10 +10,10 @@ router.register(r'products/comments', viewsets.ProductCommentsViewSet)
 promo_urlpatterns = [
     path('', views.PromotionListAPIView.as_view(), name='promotion-list-api'),
     path('create/', views.PromotionCreateAPIView.as_view(), name='promotion-create-api'),
-    path('<str:slug>/', views.PromotionRetrieveAPIView.as_view(), name='promotion-retrieve-api'),
-    path('<str:slug>/update/', views.PromotionUpdateAPIView.as_view(), name='promotion-update-api'),
-    path('<str:slug>/delete/', views.PromotionDeleteAPIView.as_view(), name='promotion-delete-api'),
-    path('add-remove/', views.PromotionAddRemoveAPIView.as_view(), name='promotion-add-remove-api')
+    path('<uuid:id>/', views.PromotionRetrieveAPIView.as_view(), name='promotion-retrieve-api'),
+    path('<uuid:id>/update/', views.PromotionUpdateAPIView.as_view(), name='promotion-update-api'),
+    path('<uuid:id>/delete/', views.PromotionDeleteAPIView.as_view(), name='promotion-delete-api'),
+    path('add-remove/<uuid:id>/', views.PromotionAddRemoveAPIView.as_view(), name='promotion-add-remove-api')
 ]
 
 

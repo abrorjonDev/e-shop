@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 from django_filters import rest_framework as rf_filter
-
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
@@ -212,19 +212,18 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
 class PromotionBaseView:
     queryset = Promotions.objects.all()
     serializer_class = PromotionSerializer
-
+    parser_classes = (FormParser, MultiPartParser)
 
 class PromotionListAPIView(PromotionBaseView, generics.ListAPIView):
     """Promotion List API."""
-
+    pass
 
 class PromotionCreateAPIView(PromotionBaseView, generics.CreateAPIView):
     """Promotion Create API."""
-
+    pass
 
 class PromotionRetrieveAPIView(PromotionBaseView, generics.RetrieveAPIView):
     """Promotion Retrieve API."""
-
     lookup_field = 'id'
 
 
@@ -241,3 +240,4 @@ class PromotionDeleteAPIView(PromotionBaseView, generics.DestroyAPIView):
 class PromotionAddRemoveAPIView(PromotionBaseView, generics.UpdateAPIView):
     """You can add or remove products from promotion.."""
     serializer_class = PromotionUpdateSerializer
+    lookup_field = 'id'

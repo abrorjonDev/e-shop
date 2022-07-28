@@ -28,12 +28,12 @@ class ProductImagesListSerializer(serializers.ModelSerializer):
 class ProductsListSerializer(serializers.ModelSerializer):
     
     comments_count = serializers.IntegerField(read_only=True)
-    in_promotion = PromotionListSerializer(required=False, many=False)
-    thumbnail = ProductImagesListSerializer(required=False, many=False)
-    images = serializers.FileField(write_only=True)
+    in_promotion = PromotionListSerializer(read_only=True, many=False)
+    thumbnail = ProductImagesListSerializer(read_only=True, many=False)
+
     class Meta:
         model = Products
-        fields = ("slug", "title", "status", "price", "comments_count", "in_promotion", "thumbnail", "images", "seen")
+        fields = ("slug", "title", "status", "price", "comments_count", "in_promotion", "thumbnail", "seen")
 
     
 
@@ -126,7 +126,6 @@ class ProductSerializer(serializers.ModelSerializer):
     comments_count = serializers.IntegerField(read_only=True)
     in_promotion = PromotionListSerializer(many=False, read_only=True)
     images = ProductImagesListSerializer(required=False, many=True)
-    files = serializers.FileField(write_only=True)
     category_name = serializers.CharField(source="category.title",read_only=True)
     category_slug = serializers.CharField(source="category.slug", read_only=True)
 
@@ -147,7 +146,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "sub_category", "subcategory_name", "subcategory_slug",
             "description_en", "description_ru","description_uz", "characteristics_en", "characteristics_ru", "characteristics_uz", 'status', 'price', 'quantity',
             'comments', 'comments_count', 'in_promotion','similar_products',
-            'images', 'seen', 'files'
+            'images', 'seen',
         )
         read_only_fields = [
              'title', "description", "characteristics",'seen', 'slug',
@@ -161,22 +160,14 @@ class ProductSerializer(serializers.ModelSerializer):
             'description_uz': {'write_only':True},
             'characteristics_ru': {'write_only':True},
             'characteristics_uz': {'write_only':True},
-            'characteristics_en': {'write_only':True},
-            'files': {'write_only':True},
+            'characteristics_en': {'write_only':True}
         }
 
     def create(self, attrs):
-        images = self.context['request'].FILES.pop('files')
-        attrs.pop('files')
         product = super().create(attrs)
         product.created = self.context['request'].user
         product.save()
-        for img in images:
-            ProductImages.objects.create(
-                image=img,
-                product=product,
-                created=product.created
-            )
+        
         return product
 
     # def to_representation(self, instance):
@@ -198,26 +189,22 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, attrs):
         instance.modified = self.context['request'].user
-        print("ATTRS: ",attrs)
-        # if self.context['request'].data
-        files = self.context['request'].FILES.pop('files', None)
-        if files:
-            ProductImages.objects.filter(product=instance).delete()
-            for img in files:
-                ProductImages.objects.create(
-                image=img,
-                product=instance,
-                created=instance.modified
-            )
+        
         return super().update(instance, attrs)
 
 class ProductImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
         fields = "__all__"
-        extra_kwargs = {
-            'image':{'read_only':False}
-        }
+        read_only_fields = ('created', 'modified')
+
+    def create(self, attrs):
+        attrs['created'] = self.context['request'].user
+        return super().create(attrs)
+
+    def update(self, instance, attrs):
+        attrs['modified'] = self.context['request'].user
+        return super().update(instance, attrs)
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
