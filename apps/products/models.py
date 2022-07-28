@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
 import uuid
 from apps.base_models import *
@@ -11,12 +12,12 @@ import random
 from django.conf import settings
 
 # INTERNALS
-from .validators import validate_file_extension
+from .validators import validate_file_extension, validate_slug
 
 
 class Categories(BaseModel):
-    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
-    title = models.CharField(max_length=120, verbose_name=_('title'))
+    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False, validators=[validate_slug])
+    title = models.CharField(max_length=120, verbose_name=_('title'), validators=[validate_slug])
     image = models.ImageField(upload_to='categories', null=True, blank=True)
     @property
     def imageURL(self):
@@ -63,8 +64,8 @@ class Categories(BaseModel):
 
 
 class SubCategories(BaseModel):
-    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False)
-    title = models.CharField(max_length=120, verbose_name=_('title'))
+    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False, validators=[validate_slug])
+    title = models.CharField(max_length=120, verbose_name=_('title'), validators=[validate_slug])
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
     )
@@ -104,8 +105,8 @@ class Products(BaseModel):
         in_stock = ChoiceItem('in_stock', 'In Stock')
         archived = ChoiceItem('archived', 'Archived')
 
-    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'))
-    title = models.CharField(max_length=120, verbose_name=_('title'))
+    slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), validators=[validate_slug])
+    title = models.CharField(max_length=120, verbose_name=_('title'), validators=[validate_slug])
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
     )
@@ -220,7 +221,7 @@ class Promotions(BaseModel):
     description = RichTextField(null=True,blank=True)
 
     products = models.ManyToManyField(
-        Products
+        Products, null=True, blank=True
     )
 
     percentage = models.FloatField(

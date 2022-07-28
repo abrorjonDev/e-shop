@@ -4,7 +4,7 @@ from rest_framework.generics import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from .models import *
 
-
+from .validators import validate_slug
 
 class PromotionListSerializer(serializers.ModelSerializer):
     # is_active = serializers.BooleanField(read_only=True)
@@ -69,14 +69,15 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
     subcategories = SubcategoryListSerializer(read_only=True, many=True)
     slug = serializers.SlugField(read_only=True)
     imageURL = serializers.CharField(read_only=True)
+    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+
     class Meta:
         model = Categories
         fields = ("slug", "title", "title_en","title_ru", "title_uz", "subcategories", "image", "imageURL")
         read_only_fields = ('title', 'subcategories', "imageURL")
         extra_kwargs = {
-            'title_en': {'write_only':True},
-            'title_ru': {'write_only':True},
-            'title_uz': {'write_only':True},
             'image': {'write_only':True},
         }
 
@@ -98,6 +99,9 @@ class CategorySerializer(serializers.ModelSerializer):
     subcategories = SubcategoryListSerializer(read_only=True, many=True)
     products = ProductsListSerializer(read_only=True, many=True)
     imageURL = serializers.CharField(read_only=True)
+    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
     class Meta:
         model = Categories
         fields = ("slug", "title","title_en","title_ru", "title_uz","subcategories", "products", "image", "imageURL")
@@ -131,6 +135,10 @@ class ProductSerializer(serializers.ModelSerializer):
 
     similar_products = ProductsListSerializer(many=True, read_only=True)
     
+    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+
     class Meta:
         model = Products
         fields = (
@@ -142,7 +150,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'images', 'seen', 'files'
         )
         read_only_fields = [
-             'title', "description", "characteristics",'seen'
+             'title', "description", "characteristics",'seen', 'slug',
             ]
         extra_kwargs = {
             'title_en': {'write_only':True},
@@ -178,6 +186,10 @@ class ProductSerializer(serializers.ModelSerializer):
     #     return data
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
+    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+
     class Meta:
         model = Products
         exclude = ('title', 'description', 'characteristics', )
@@ -223,6 +235,11 @@ class PromotionSerializer(serializers.ModelSerializer):
     modified_by = serializers.CharField(source='modified.username', read_only=True)
     promoted_products = serializers.SerializerMethodField(method_name='get_promoted_products')
     # image = serializers.ImageField(required=False)
+
+    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+
     class Meta:
         model = Promotions
         fields = (

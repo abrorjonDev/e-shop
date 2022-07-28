@@ -30,7 +30,7 @@ from rest_framework import permissions
 class BothHttpAndHttpsSchemaGenerator(OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
-        schema.schemes = ["https"]
+        schema.schemes = ["http", "https"]
         return schema
 
 schema_view = drf_get_schema_view( # new
