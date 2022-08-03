@@ -146,7 +146,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "sub_category", "subcategory_name", "subcategory_slug",
             "description_en", "description_ru","description_uz", "characteristics_en", "characteristics_ru", "characteristics_uz", 'status', 'price', 'quantity',
             'comments', 'comments_count', 'in_promotion','similar_products',
-            'images', 'seen',
+            'images', 'seen', 'description'
         )
         read_only_fields = [
              'title', "description", "characteristics",'seen', 'slug',
