@@ -23,7 +23,12 @@ class PromotionListSerializer(serializers.ModelSerializer):
 class ProductImagesListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
-        fields = ("id", 'image') # "imageURL",
+        fields = ("id", 'image', "imageURL",) #
+
+        read_only_fields = ('imageURL', ) 
+        extra_kwargs = {
+            'image':{'write_only': True}
+        }
 
 class ProductsListSerializer(serializers.ModelSerializer):
     
