@@ -6,6 +6,7 @@ from . import viewsets
 router = routers.DefaultRouter()
 router.register(r'products/images', viewsets.ProductImagesViewSet)
 router.register(r'products/comments', viewsets.ProductCommentsViewSet)
+router.register(r'currency', viewsets.CurrencyViewSet)
 
 promo_urlpatterns = [
     path('', views.PromotionListAPIView.as_view(), name='promotion-list-api'),

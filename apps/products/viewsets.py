@@ -1,4 +1,4 @@
-
+from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 # INTERNALS
@@ -46,3 +46,16 @@ class PromotionProductAddRemoveViewSet(viewsets.ModelViewSet):
     http_method_names = ['retrieve', 'patch']
 
     # def retrieve(self, request, *args, **kwargs):
+
+
+class CurrencyViewSet(viewsets.ModelViewSet):
+    """
+    Only get the last currency value
+    """
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+
+
+    def list(self, request, *args, **kwargs):
+        last_obj = Currency.objects.last()
+        return Response(self.serializer_class(last_obj, many=False).data, status=200)
