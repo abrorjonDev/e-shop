@@ -38,7 +38,7 @@ class ProductsListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Products
-        fields = ("slug", "title", "status", "price", "comments_count", "in_promotion", "thumbnail", "seen", "description")
+        fields = ("slug", "title", "status", "price", "price_UZS", "comments_count", "in_promotion", "thumbnail", "seen", "description")
 
     
 
@@ -151,10 +151,11 @@ class ProductSerializer(serializers.ModelSerializer):
             "sub_category", "subcategory_name", "subcategory_slug",
             "description_en", "description_ru","description_uz", "characteristics_en", "characteristics_ru", "characteristics_uz", 'status', 'price', 'quantity',
             'comments', 'comments_count', 'in_promotion','similar_products',
-            'images', 'seen', 'description'
+            'images', 'seen', 'description', 
+            'price_UZS',
         )
         read_only_fields = [
-             'title', "description", "characteristics",'seen', 'slug',
+             'title', "description", "characteristics",'seen', 'slug', 'price_UZS'
             ]
         extra_kwargs = {
             'title_en': {'write_only':True},
@@ -318,3 +319,9 @@ class ContactsUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contacts
         fields = ('status', )
+
+
+class CurrencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = ('id', 'value', )

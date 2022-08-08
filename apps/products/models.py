@@ -167,6 +167,13 @@ class Products(BaseModel):
     def thumbnail(self):
         return self.images.first()
 
+    @property
+    def price_UZS(self):
+        active_currency = Currency.objects.last()
+        if active_currency is None:
+            return 0
+        return self.price * active_currency.value
+
     def __str__(self):
         return '%s'%(self.slug)
 
@@ -292,3 +299,11 @@ class Contacts(models.Model):
         return '%s%s'%(
                 settings.BASE_SITE_DOMAIN, self.file.url
                 )  if (self.file and hasattr(self.file, 'url')) else None
+
+
+class Currency(models.Model):
+
+    value = models.IntegerField(_("dollar value"))
+
+    def __str__(self):
+        return str(self.value)

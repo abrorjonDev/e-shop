@@ -101,3 +101,6 @@ class PromotionAdmin(admin.ModelAdmin):
     )
     filter_horizontal = ('products',)
     list_per_page = 50
+
+
+admin.site.register(Currency)
