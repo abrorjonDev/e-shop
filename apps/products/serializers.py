@@ -29,24 +29,37 @@ class ProductImagesListSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'image':{'write_only': True}
         }
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'].scheme == 'https':
+            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None 
+        return data
 
 class ProductsListSerializer(serializers.ModelSerializer):
     
     comments_count = serializers.IntegerField(read_only=True)
     in_promotion = PromotionListSerializer(read_only=True, many=False)
-    thumbnail = ProductImagesListSerializer(read_only=True, many=False)
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Products
         fields = ("slug", "title", "status", "price", "price_UZS", "comments_count", "in_promotion", "thumbnail", "seen", "description")
 
-    
+    def get_thumbnail(self, instance):
+        return ProductImagesListSerializer(instance.thumbnail, many=False, context=self.context).data if instance.thumbnail is not None else None
 
 class SubcategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategories
         fields = ("slug", "title", 'imageURL')
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'] and self.context['request'].scheme == 'https':
+            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
+        
+        return data
 
 class SubcategorySerializer(serializers.ModelSerializer):
     # products = ProductsListSerializer(required=False, many=True)
@@ -66,12 +79,18 @@ class SubcategorySerializer(serializers.ModelSerializer):
         }
     
     def get_products(self, obj):
-        response = ProductsListSerializer(obj.products.all(), many=True).data
+        response = ProductsListSerializer(obj.products.all(), many=True, context=self.context).data
         return response
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'].scheme == 'https':
+            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
+        
+        return data
 
 class CategoryListCreateSerializer(serializers.ModelSerializer):
-    subcategories = SubcategoryListSerializer(read_only=True, many=True)
+    subcategories = serializers.SerializerMethodField()
     slug = serializers.SlugField(read_only=True)
     imageURL = serializers.CharField(read_only=True)
     title_en = serializers.CharField(validators=[validate_slug], write_only=True)
@@ -99,10 +118,19 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
         instance.modified_at = timezone.now()
         return super().update(instance, attrs)
 
+    def get_subcategories(self, instance):
+        return SubcategoryListSerializer(instance.subcategories, read_only=True, many=True, context=self.context).data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'].scheme == 'https':
+            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
+        
+        return data
 
 class CategorySerializer(serializers.ModelSerializer):
-    subcategories = SubcategoryListSerializer(read_only=True, many=True)
-    products = ProductsListSerializer(read_only=True, many=True)
+    subcategories = serializers.SerializerMethodField()
+    products = serializers.SerializerMethodField()
     imageURL = serializers.CharField(read_only=True)
     title_en = serializers.CharField(validators=[validate_slug], write_only=True)
     title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
@@ -120,6 +148,19 @@ class CategorySerializer(serializers.ModelSerializer):
         instance.modified = self.context['request'].user
         return super().update(instance, attrs)
 
+    def get_subcategories(self, instance):
+        return SubcategoryListSerializer(instance.subcategories, many=True, context=self.context).data
+
+    def get_products(self, instance):
+        return ProductsListSerializer(instance.products, many=True, context=self.context).data
+        
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'].scheme == 'https':
+            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
+        
+        return data
 
 class CommentsListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -130,14 +171,14 @@ class ProductSerializer(serializers.ModelSerializer):
     comments = CommentsListSerializer(many=True, read_only=True)
     comments_count = serializers.IntegerField(read_only=True)
     in_promotion = PromotionListSerializer(many=False, read_only=True)
-    images = ProductImagesListSerializer(required=False, many=True)
+    images = serializers.SerializerMethodField()
     category_name = serializers.CharField(source="category.title",read_only=True)
     category_slug = serializers.CharField(source="category.slug", read_only=True)
 
     subcategory_name = serializers.CharField(source="sub_category.title",read_only=True)
     subcategory_slug = serializers.CharField(source="sub_category.slug", read_only=True)
 
-    similar_products = ProductsListSerializer(many=True, read_only=True)
+    similar_products = serializers.SerializerMethodField()
     
     title_en = serializers.CharField(validators=[validate_slug], write_only=True)
     title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
@@ -176,11 +217,12 @@ class ProductSerializer(serializers.ModelSerializer):
         
         return product
 
-    # def to_representation(self, instance):
-    #     data = super().to_representation(instance)
-    #     if data.get('title_en', None):
-    #         del data['title_en']
-    #     return data
+    def get_images(self, instance):
+        return ProductImagesListSerializer(instance.images, many=True, context=self.context).data
+
+    def get_similar_products(self, instance):
+        return ProductsListSerializer(instance.similar_products, many=True, context=self.context).data
+
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
     title_en = serializers.CharField(validators=[validate_slug], write_only=True)
@@ -211,6 +253,13 @@ class ProductImagesSerializer(serializers.ModelSerializer):
     def update(self, instance, attrs):
         attrs['modified'] = self.context['request'].user
         return super().update(instance, attrs)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'].scheme == 'https':
+            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
+        
+        return data
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -271,9 +320,15 @@ class PromotionSerializer(serializers.ModelSerializer):
         return promotion
 
     def get_promoted_products(self, obj):
-        res = ProductsListSerializer(obj.products.all(), many=True).data
+        res = ProductsListSerializer(obj.products.all(), many=True, context=self.context).data
         return res
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'].scheme == 'https':
+            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
         
+        return data    
 
 class PromotionUpdateSerializer(serializers.Serializer):
     ACTIONS = (
@@ -314,6 +369,13 @@ class ContactsSerializer(serializers.ModelSerializer):
     def create(self, attrs):
         attrs['status'] = Contacts.SEEN
         return super().create(attrs)
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context['request'].scheme == 'https':
+            data['fileURL'] = data['fileURL'].replace('http', 'https') if data['fileURL'] is not None else None
+        
+        return data
 
 class ContactsUpdateSerializer(serializers.ModelSerializer):
     class Meta:
