@@ -278,9 +278,9 @@ class PromotionSerializer(serializers.ModelSerializer):
     promoted_products = serializers.SerializerMethodField(method_name='get_promoted_products')
     # image = serializers.ImageField(required=False)
 
-    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_en = serializers.CharField(validators=[validate_slug])
+    title_ru = serializers.CharField(validators=[validate_slug])
+    title_uz = serializers.CharField(validators=[validate_slug])
 
     class Meta:
         model = Promotions
@@ -295,12 +295,9 @@ class PromotionSerializer(serializers.ModelSerializer):
             )
         read_only_fields = ['title', 'description', 'imageURL']
         extra_kwargs = {
-            "description_uz":{"write_only":True, },
-            "description_ru":{"write_only":True, },
-            "description_en":{"write_only":True, },
-            "title_ru":{"write_only":True, },
-            "title_uz":{"write_only":True, },
-            "title_en":{"write_only":True, },
+            # "description_uz":{"write_only":True, },
+            # "description_ru":{"write_only":True, },
+            # "description_en":{"write_only":True, },
             "products":{"write_only":True, },
             "image":{ "read_only":False, },
         }
