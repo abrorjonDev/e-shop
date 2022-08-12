@@ -71,9 +71,9 @@ class SubcategorySerializer(serializers.ModelSerializer):
         fields = ("slug", "title", "title_en", "title_ru", "title_uz", "category", "products", "category_name", "category_slug", "image", "imageURL")
         read_only_fields = ('title', "imageURL")
         extra_kwargs = {
-            'title_en': {'write_only':True},
-            'title_ru': {'write_only':True},
-            'title_uz': {'write_only':True},
+            # 'title_en': {'write_only':True},
+            # 'title_ru': {'write_only':True},
+            # 'title_uz': {'write_only':True},
             'category': {'write_only':True},
             'image': {'write_only':True},
         }
@@ -132,9 +132,9 @@ class CategorySerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()
     products = serializers.SerializerMethodField()
     imageURL = serializers.CharField(read_only=True)
-    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_en = serializers.CharField(validators=[validate_slug])
+    title_ru = serializers.CharField(validators=[validate_slug])
+    title_uz = serializers.CharField(validators=[validate_slug])
     class Meta:
         model = Categories
         fields = ("slug", "title","title_en","title_ru", "title_uz","subcategories", "products", "image", "imageURL")
@@ -180,9 +180,9 @@ class ProductSerializer(serializers.ModelSerializer):
 
     similar_products = serializers.SerializerMethodField()
     
-    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_en = serializers.CharField(validators=[validate_slug])
+    title_ru = serializers.CharField(validators=[validate_slug])
+    title_uz = serializers.CharField(validators=[validate_slug])
 
     class Meta:
         model = Products
@@ -198,17 +198,17 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = [
              'title', "description", "characteristics",'seen', 'slug', 'price_UZS'
             ]
-        extra_kwargs = {
-            'title_en': {'write_only':True},
-            'title_ru': {'write_only':True},
-            'title_uz': {'write_only':True},
-            'description_en': {'write_only':True},
-            'description_ru': {'write_only':True},
-            'description_uz': {'write_only':True},
-            'characteristics_ru': {'write_only':True},
-            'characteristics_uz': {'write_only':True},
-            'characteristics_en': {'write_only':True}
-        }
+        # extra_kwargs = {
+        #     'title_en': {'write_only':True},
+        #     'title_ru': {'write_only':True},
+        #     'title_uz': {'write_only':True},
+        #     'description_en': {'write_only':True},
+        #     'description_ru': {'write_only':True},
+        #     'description_uz': {'write_only':True},
+        #     'characteristics_ru': {'write_only':True},
+        #     'characteristics_uz': {'write_only':True},
+        #     'characteristics_en': {'write_only':True}
+        # }
 
     def create(self, attrs):
         product = super().create(attrs)
@@ -225,9 +225,9 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
-    title_en = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_ru = serializers.CharField(validators=[validate_slug], write_only=True)
-    title_uz = serializers.CharField(validators=[validate_slug], write_only=True)
+    title_en = serializers.CharField(validators=[validate_slug])
+    title_ru = serializers.CharField(validators=[validate_slug])
+    title_uz = serializers.CharField(validators=[validate_slug])
 
     class Meta:
         model = Products
