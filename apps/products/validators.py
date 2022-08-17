@@ -14,6 +14,6 @@ def validate_slug(value):
         checked_list = [None, ""]
         if value in checked_list:
             raise ValidationError(_('This field cannot be %s')%(value))
-        return value
     except:
-        return value
+        pass
+    return value
