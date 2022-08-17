@@ -15,6 +15,7 @@ from ..filters import *
 class CategoryBaseClass:
     queryset = Categories.objects.all()
     serializer_class = CategoryListCreateSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 class CategoryListView(CategoryBaseClass, generics.ListAPIView):
     
@@ -75,7 +76,7 @@ class CategoryDeleteAPIView(CategoryBaseClass, generics.DestroyAPIView):
 class SubCategoryBaseClass:
     queryset = SubCategories.objects.all()
     serializer_class = SubcategorySerializer
-
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 class SubCategoryListView(SubCategoryBaseClass, generics.ListAPIView):
     

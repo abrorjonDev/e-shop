@@ -52,10 +52,11 @@ class Categories(BaseModel):
         print(self.title, self.slug)
         if self.slug is None or self.slug == '':
             self.slug = slugify(self.title_en)
+            k = 1
             while self.check_existance_of_slug():
                 self.slug = slugify(
-                    '%s-%s'%(self.slug, ''.join(random.choices(self.title_en, k=2)))
-                )
+                    '%s-%d'%(self.slug, k))
+                k += 1
         return super(Categories, self).save(*args, **kwargs)
 
     def check_existance_of_slug(self):
@@ -88,10 +89,11 @@ class SubCategories(BaseModel):
     def save(self, *args, **kwargs):
         if self.slug is None or self.slug == '':
             self.slug = slugify(self.title_en)
+            k = 1
             while self.check_existance_of_slug():
                 self.slug = slugify(
-                    '%s-%s'%(self.slug, ''.join(random.choices(any([self.title_en, self.title_uz, 'qwertyuioplkjhgfdsazxcvbnm']), k=2)))
-                )
+                    '%s-%d'%(self.slug, k))
+                k += 1
         return super(SubCategories, self).save(*args, **kwargs)
 
     def check_existance_of_slug(self):
@@ -186,10 +188,11 @@ class Products(BaseModel):
     def save(self, *args, **kwargs):
         if self.slug is None or self.slug == '': 
             self.slug = slugify(self.title_en)
+            k = 1
             while self.check_existance_of_slug():
                 self.slug = slugify(
-                    '%s-%s'%(self.slug, ''.join(random.choices(self.title_en, k=2)))
-                )
+                    '%s-%d'%(self.slug, k))
+                k += 1
         return super(Products, self).save(*args, **kwargs)
 
     def check_existance_of_slug(self):

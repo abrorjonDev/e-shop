@@ -15,6 +15,10 @@ class CompanyInfo(BaseModel):
     longitude = models.CharField(max_length=50, null=True, blank=True)
     latitude = models.CharField(max_length=50, null=True, blank=True)
 
+    telegram = models.CharField(max_length=1000, null=True, blank=True)
+    instagram = models.CharField(max_length=1000, null=True, blank=True)
+    facebook = models.CharField(max_length=1000, null=True, blank=True)
+
     class Meta:
         verbose_name = _('Company')
         verbose_name_plural = _('Company')
