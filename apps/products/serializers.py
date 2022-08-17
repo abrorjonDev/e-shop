@@ -66,15 +66,16 @@ class SubcategorySerializer(serializers.ModelSerializer):
     products = serializers.SerializerMethodField()
     category_name = serializers.CharField(source="category.title", read_only=True)
     category_slug = serializers.CharField(source="category.slug", read_only=True)
+
     class Meta:
         model = SubCategories
         fields = ("slug", "title", "title_en", "title_ru", "title_uz", "category", "products", "category_name", "category_slug", "image", "imageURL")
         read_only_fields = ('title', "imageURL")
         extra_kwargs = {
-            # 'title_en': {'write_only':True},
-            # 'title_ru': {'write_only':True},
-            # 'title_uz': {'write_only':True},
-            'category': {'write_only':True},
+            'title_en': {'write_only':True, 'required':True},
+            'title_ru': {'write_only':True, 'required':True},
+            'title_uz': {'write_only':True, 'required':True},
+            'category': {'write_only':True, 'required':True},
             'image': {'write_only':True},
         }
     
