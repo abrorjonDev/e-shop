@@ -10,8 +10,10 @@ def validate_file_extension(value):
 
 
 def validate_slug(value):
-    print("VALUE in validate slug: ", value)
-    checked_list = [None, ""]
-    if value in checked_list:
-        raise ValidationError(_('This field cannot be %s')%(value))
-    return value
+    try:
+        checked_list = [None, ""]
+        if value in checked_list:
+            raise ValidationError(_('This field cannot be %s')%(value))
+        return value
+    except:
+        return value

@@ -17,7 +17,7 @@ from .validators import validate_file_extension, validate_slug
 
 class Categories(BaseModel):
     slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False, validators=[validate_slug])
-    title = models.CharField(max_length=120, verbose_name=_('title'), validators=[validate_slug])
+    title = models.CharField(max_length=120, verbose_name=_('title'))
     image = models.ImageField(upload_to='categories', null=True, blank=True)
     @property
     def imageURL(self):
@@ -66,7 +66,7 @@ class Categories(BaseModel):
 
 class SubCategories(BaseModel):
     slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), editable=False, validators=[validate_slug])
-    title = models.CharField(max_length=120, verbose_name=_('title'), validators=[validate_slug])
+    title = models.CharField(max_length=120, verbose_name=_('title')) # , validators=[validate_slug]
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
     )
@@ -108,7 +108,7 @@ class Products(BaseModel):
         archived = ChoiceItem('archived', 'Archived')
 
     slug = models.SlugField(max_length=120, primary_key=True, unique=True, verbose_name=_('Slug'), validators=[validate_slug])
-    title = models.CharField(max_length=120, verbose_name=_('title'), validators=[validate_slug])
+    title = models.CharField(max_length=120, verbose_name=_('title')) #, validators=[validate_slug]
     category = models.ForeignKey(
         Categories, models.SET_NULL, null=True, verbose_name=_('Category')
     )
