@@ -258,7 +258,7 @@ class ProductImagesSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if self.context['request'].scheme == 'https':
-            data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
+            data['imageURL'] = data['image'].replace('http', 'https') if data['image'] is not None else None
         
         return data
 
