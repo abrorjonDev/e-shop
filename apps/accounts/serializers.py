@@ -10,14 +10,17 @@ class CompanyInfoSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ['created', 'modified']
 
-    def create(self, attrs):
-        company = super().create(attrs)
-        company.created = self.context['request'].user
-        company.save()
-        return company
+    def validate(self, attrs):
+        if self.instance:
+            attrs['modified'] = self.context['request'].user
+        else:
+            attrs['created'] = self.context['request'].user
+        return attrs
+
+    # def create(self, attrs):
+    #     attrs['created'] = self.context['request'].user
+    #     return super().create(attrs)
     
-    def update(self, instance, attrs):
-        instance = super().update(instance, attrs)
-        instance.modified = self.context['request'].user
-        instance.save()
-        return instance
+    # def update(self, instance, attrs):
+    #     attrs['modified'] = self.context['request'].user
+    #     return super().update(instance, attrs)
