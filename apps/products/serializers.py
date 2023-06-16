@@ -2,23 +2,22 @@ from rest_framework import serializers
 
 from rest_framework.generics import get_object_or_404
 from django.utils.translation import gettext_lazy as _
-from .models import *
 
+from .models import *
 from .validators import validate_slug
 
+
 class PromotionListSerializer(serializers.ModelSerializer):
-    # is_active = serializers.BooleanField(read_only=True)
-    # created = serializers.CharField(source='created.username', required=False)
-    # modified =  serializers.CharField(source='modified.username', required=False)
+
     class Meta:
         model = Promotions
-        fields = ("id", "title", "percentage", "is_active", ) #  "created", "modified")
+        fields = ("id", "title", "percentage", "is_active", )
 
     extra_kwargs = {
         "date_from":{"write_only":True, },
         "date_till":{"write_only":True, }
-
     }
+
 
 class ProductImagesListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,10 +33,13 @@ class ProductImagesListSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if self.context['request'].scheme == 'https':
             data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None 
+            # or
+            # data['imageURL'] = self.context['request'].build_absolute_uri(instance.image.url) if instance.image else None
+        
         return data
 
+
 class ProductsListSerializer(serializers.ModelSerializer):
-    
     comments_count = serializers.IntegerField(read_only=True)
     in_promotion = PromotionListSerializer(read_only=True, many=False)
     thumbnail = serializers.SerializerMethodField()
@@ -47,7 +49,9 @@ class ProductsListSerializer(serializers.ModelSerializer):
         fields = ("slug", "title", "status", "price", "price_UZS", "comments_count", "in_promotion", "thumbnail", "seen", "description")
 
     def get_thumbnail(self, instance):
-        return ProductImagesListSerializer(instance.thumbnail, many=False, context=self.context).data if instance.thumbnail is not None else None
+        if instance.thumbnail:
+            return ProductImagesListSerializer(instance.thumbnail, many=False, context=self.context).data
+
 
 class SubcategoryListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,11 +62,12 @@ class SubcategoryListSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if self.context['request'] and self.context['request'].scheme == 'https':
             data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
-        
+            # or
+            # data['imageURL'] = self.context['request'].build_absolute_uri(instance.image.url) if instance.image else None
         return data
 
+
 class SubcategorySerializer(serializers.ModelSerializer):
-    # products = ProductsListSerializer(required=False, many=True)
     products = serializers.SerializerMethodField()
     category_name = serializers.CharField(source="category.title", read_only=True)
     category_slug = serializers.CharField(source="category.slug", read_only=True)
@@ -80,15 +85,16 @@ class SubcategorySerializer(serializers.ModelSerializer):
         }
     
     def get_products(self, obj):
-        response = ProductsListSerializer(obj.products.all(), many=True, context=self.context).data
-        return response
+        return ProductsListSerializer(obj.products.all(), many=True, context=self.context).data
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if self.context['request'].scheme == 'https':
             data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
-        
+            # or
+            # data['imageURL'] = self.context['request'].build_absolute_uri(instance.image.url) if instance.image else None
         return data
+
 
 class CategoryListCreateSerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()
@@ -126,8 +132,10 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if self.context['request'].scheme == 'https':
             data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
-        
+            # or
+            # data['imageURL'] = self.context['request'].build_absolute_uri(instance.image.url) if instance.image else None
         return data
+
 
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()
@@ -160,13 +168,16 @@ class CategorySerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if self.context['request'].scheme == 'https':
             data['imageURL'] = data['imageURL'].replace('http', 'https') if data['imageURL'] is not None else None
-        
+            # or
+            # data['imageURL'] = self.context['request'].build_absolute_uri(instance.image.url) if instance.image else None
         return data
+
 
 class CommentsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductComments
         fields = ("id", "name", "review", "comment", )
+
 
 class ProductSerializer(serializers.ModelSerializer):
     comments = CommentsListSerializer(many=True, read_only=True)
@@ -199,17 +210,6 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = [
              'title', "description", "characteristics",'seen', 'slug', 'price_UZS'
             ]
-        # extra_kwargs = {
-        #     'title_en': {'write_only':True},
-        #     'title_ru': {'write_only':True},
-        #     'title_uz': {'write_only':True},
-        #     'description_en': {'write_only':True},
-        #     'description_ru': {'write_only':True},
-        #     'description_uz': {'write_only':True},
-        #     'characteristics_ru': {'write_only':True},
-        #     'characteristics_uz': {'write_only':True},
-        #     'characteristics_en': {'write_only':True}
-        # }
 
     def create(self, attrs):
         product = super().create(attrs)
